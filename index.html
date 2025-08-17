@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เครื่องคำนวณ BMI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: linear-gradient(to right, #83a4d4, #b6fbff);
+      text-align: center;
+      padding: 40px;
+      margin: 0;
+    }
+
+    .container {
+      background-color: white;
+      max-width: 600px;
+      margin: auto;
+      padding: 50px 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+      margin-bottom: 30px;
+    }
+
+    input {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #00bfff;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      background-color: #f2f2f2;
+    }
+
+    canvas {
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>เครื่องคำนวณ BMI</h1>
+    <p>กรอกข้อมูลของคุณ:</p>
+    <input type="number" id="weight" placeholder="น้ำหนัก (กิโลกรัม)">
+    <br>
+    <input type="number" id="height" placeholder="ส่วนสูง (เซนติเมตร)">
+    <br>
+    <button onclick="calculateBMI()">คำนวณ</button>
+
+    <div class="result" id="result"></div>
+
+    <canvas id="bmiChart" width="400" height="200"></canvas>
+  </div>
+
+  <script>
+    const resultEl = document.getElementById("result");
+
+    // ตั้งค่า Chart.js
+    const ctx = document.getElementById("bmiChart").getContext("2d");
+    const bmiData = {
+      labels: [],
+      datasets: [{
+        label: 'ค่าดัชนีมวลกาย (BMI)',
+        data: [],
+        backgroundColor: 'rgba(0, 191, 255, 0.3)',
+        borderColor: 'rgba(0, 191, 255, 1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3
+      }]
+    };
+
+    const bmiChart = new Chart(ctx, {
+      type: 'line',
+      data: bmiData,
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            suggestedMax: 40
+          }
+        }
+      }
+    });
+
+    // ฟังก์ชันคำนวณ BMI
+    function calculateBMI() {
+      const weight = parseFloat(document.getElementById("weight").value);
+      const height = parseFloat(document.getElementById("height").value) / 100;
+
+      if (!weight || !height || weight <= 0 || height <= 0) {
+        resultEl.style.backgroundColor = "#ffe0e0";
+        resultEl.innerHTML = "กรุณากรอกน้ำหนักและส่วนสูงให้ถูกต้อง";
+        return;
+      }
+
+      const bmi = weight / (height * height);
+      const time = new Date().toLocaleTimeString();
+
+      let category = "";
+      let color = "";
+
+      if (bmi < 18.5) {
+        category = "น้ำหนักน้อย";
+        color = "#fff3cd";
+      } else if (bmi < 24.9) {
+        category = "ปกติ";
+        color = "#d4edda";
+      } else if (bmi < 29.9) {
+        category = "น้ำหนักเกิน";
+        color = "#ffeeba";
+      } else {
+        category = "อ้วน";
+        color = "#f8d7da";
+      }
+
+      resultEl.style.backgroundColor = color;
+      resultEl.innerHTML = `BMI ของคุณคือ <strong>${bmi.toFixed(2)}</strong><br>อยู่ในเกณฑ์: <strong>${category}</strong>`;
+
+      // เพิ่มข้อมูลลงในกราฟ
+      bmiChart.data.labels.push(time);
+      bmiChart.data.datasets[0].data.push(bmi.toFixed(2));
+      bmiChart.update();
+    }
+  </script>
+</body>
+</html>
